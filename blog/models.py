@@ -9,6 +9,9 @@ def gen_slug(s):
 
 
 class Post(models.Model):
+    class Meta:
+        ordering = ['-date_pub']
+
     title = models.CharField(max_length=150, db_index=True)
     slug = models.SlugField(max_length=150, blank=True, unique=True)
     body = models.TextField(blank=True, db_index=True)
@@ -34,6 +37,10 @@ class Post(models.Model):
 
 
 class Tag(models.Model):
+
+    class Meta:
+        ordering = ['title']
+
     title = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, unique=True)
 

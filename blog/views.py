@@ -1,10 +1,12 @@
 from django.views.generic import View
 from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.urls import reverse
 from .forms import TagForm, PostForm
 from .models import Post, Tag
 from .utils import ObjectDetailMixin, ObjectCreateMixin, ObjectUpdateMixin, ObjectDeleteMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 class PostCreate(LoginRequiredMixin, ObjectCreateMixin, View):
     form_model = PostForm
@@ -33,8 +35,26 @@ class PostDelete(LoginRequiredMixin, ObjectDeleteMixin, View):
 
 def post_list(request):
     posts = Post.objects.all()
+    paginator = Paginator(posts, 3)
+    page_number = request.GET.get('page', 100)
+    page = paginator.get_page(page_number)
+    is_pagenaed = page.has_other_pages()
+
+    if page.has_previous():
+        prev_url = f'?page={page.previous_page_number()}'
+    else:
+        prev_url = ''
+
+    if page.has_next():
+        next_url = f'?page={page.next_page_number()}'
+    else:
+        next_url = ''
+
     return render(request, 'blog/index.html', context={
-        'posts': posts,
+        'page_object': page,
+        'is_pagenaed': is_pagenaed,
+        'prev_url': prev_url,
+        'next_url': next_url,
     })
 
 
